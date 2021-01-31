@@ -8,7 +8,7 @@ spec:
   selector:
     matchLabels:
       app: goserver
-  replicas: 10
+  replicas: 1
   template:
     metadata:
       labels:
@@ -16,7 +16,33 @@ spec:
     spec:
       containers:
         - name: goserver
-          image: "lndaquino/hello-go:v5.2"
+          image: "lndaquino/hello-go:v5.4"
+
+          resources:
+            requests: # especificamos o minimo q a aplicaçaõ precisa pra rodar, reservando esses recursos para nosso pod
+              cpu: 100m # vCPU = 1000m (milicores / share de cpu) / 0.5 = usa metade dos recursos da cpu
+              memory: 20Mi # Mi = megabyte de memoria
+            limits: # especifica o limite superior de recursos q pode utilizar para não ter perigo de derrubar outros recursos - a soma dos limites não pode ultrapassar os recursos do cluster
+              cpu: 500m
+              memory: 25Mi
+
+          # livenessProbe:
+          #   httpGet: # rota de prova de vida da aplicação
+          #     path: /healthz
+          #     port: 8000
+          #   periodSeconds: 5 # periodicidade da prova de vida
+          #   failureThreshold: 3 # qts vezes tem q falar pra reiniciar o pod
+          #   timeoutSeconds: 1 # 1 é padrão - tempo pra aguardar a requisição responder antes de dar failure; teste de forma integrada exige tempos maiores, testando só endpoint tempo menor
+          #   successThreshold: 1 # qts vezes tem q testar para dizer q está tudo ok
+
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: 8000
+            periodSeconds: 3
+            failureThreshold: 1
+            initialDelaySeconds: 10 # aguarda tantos segundos para iniciar a probe
+
           envFrom:
             - configMapRef:
                 name: goserver-env
