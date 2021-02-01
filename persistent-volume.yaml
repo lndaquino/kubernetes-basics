@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: pv1
+spec:
+  capacity:
+    storage: 50Gi
+  accessModes:
+    - ReadWriteOnce # pode gravar e ler desde q esteja dentro do mesmo node. Se estiver fora desse node não vai dar certo
